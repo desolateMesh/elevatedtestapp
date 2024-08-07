@@ -6,10 +6,20 @@ from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
 from msal import ConfidentialClientApplication
 
+# Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
+
+# Set Flask app configuration from environment variables
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
 def get_db_connection():
     server = os.getenv('DB_SERVER')
@@ -29,18 +39,13 @@ def check_credentials(username, password):
         user = cursor.fetchone()
         conn.close()
 
-        print(f"Database query result: {user}")  
-
         if user:
-            print(f"Stored password: {user.PasswordHash}")  
-            print(f"Provided password: {password}")  
             is_password_correct = (user.PasswordHash == password)
-            print(f"Password check result: {is_password_correct}")  
             if is_password_correct:
                 return {'id': user.UserID, 'role': user.Role}
         return None
     except Exception as e:
-        print(f"Error in check_credentials: {str(e)}")  
+        print(f"Error in check_credentials: {str(e)}")
         return None
     
 class Config:
@@ -60,9 +65,7 @@ def get_access_token():
     client = build_msal_app()
     result = client.acquire_token_for_client(scopes=Config.SCOPE)
     if 'access_token' in result:
-        token = result['access_token']
-        print(f"Access Token: {token}")
-        return token
+        return result['access_token']
     else:
         print(f"Failed to acquire token: {result.get('error')}")
         return None
@@ -72,25 +75,63 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        print(f"Login attempt: username={username}, password={'*' * len(password)}")  
         user = check_credentials(username, password)
         if user:
-            print(f"User authenticated: {user}")  
-            session['user_id'] = user['id']  
+            session['user_id'] = user['id']
             session['username'] = username
-            if user['role'] == 'admin':  
+            if user['role'] == 'admin':
                 return redirect(url_for('admin_dashboard'))
             else:
                 return redirect(url_for('user_dashboard'))
         else:
-            print("Authentication failed")  
             return render_template('login.html', error='Invalid credentials')
     return render_template('login.html')
 
+@app.route('/request_access_form', methods=['GET'])
+def request_access_form():
+    return render_template('request_access_form.html')
 
-# Routes for pages
-@app.route('/request_access_form.html')
-def request_access():
+@app.route('/submit_request_access', methods=['POST'])
+def submit_request_access():
+    if request.method == 'POST':
+        firstname = request.form['firstname']
+        lastname = request.form['lastname']
+        email = request.form['email']
+        notes = request.form['notes']
+        subject = "Access Request"
+        body = f"First Name: {firstname}\nLast Name: {lastname}\nEmail: {email}\nNotes: {notes}"
+        payload = {
+            "message": {
+                "subject": subject,
+                "body": {
+                    "contentType": "Text",
+                    "content": body
+                },
+                "toRecipients": [
+                    {
+                        "emailAddress": {
+                            "address": app.config['MAIL_DEFAULT_SENDER']
+                        }
+                    }
+                ]
+            },
+            "saveToSentItems": "false"
+        }
+        try:
+            token = get_access_token()
+            headers = {
+                'Authorization': f'Bearer {token}',
+                'Content-Type': 'application/json'
+            }
+            send_mail_url = f'https://graph.microsoft.com/v1.0/users/{app.config["MAIL_USERNAME"]}/sendMail'
+            response = requests.post(send_mail_url, json=payload, headers=headers)
+            response.raise_for_status()
+            flash('Your request has been sent successfully!', 'success')
+        except Exception as e:
+            flash(f'Failed to send your request. Error: {e}', 'error')
+
+        return redirect(url_for('request_access_form'))
+
     return render_template('request_access_form.html')
 
 @app.route('/user_dashboard')
@@ -120,21 +161,18 @@ def dashboard():
 def tests():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
     return render_template('tests.html', user_id=session['user_id'], username=session['username'])
 
 @app.route('/userstats')
 def userstats():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
     return render_template('userstats.html', user_id=session['user_id'], username=session['username'])
 
 @app.route('/accountmanagement')
 def accountmanagement():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-   
     return render_template('accountmanagement.html', user_id=session['user_id'], username=session['username'])
 
 if __name__ == '__main__':
