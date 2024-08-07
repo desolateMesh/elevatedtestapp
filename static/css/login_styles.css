@@ -1,47 +1,128 @@
+/* Index Style */
 body {
     font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    background-color: #271524; /* Dark Gray */
+    color: #FFFFFF; /* White */
     margin: 0;
-    background-color: #f0f0f0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
 }
 
-.login-container {
-    background-color: white;
-    padding: 2em;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+header {
     text-align: center;
 }
 
-.logo {
-    max-width: 200px;
+header .logo {
+    width: 300px; /* Adjust the size as needed */
     margin-bottom: 20px;
 }
 
-h2 {
-    margin-bottom: 20px;
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    color: #01C1C7; /* Accent Cyan */
 }
 
-form {
+main {
+    width: 100%;
+    max-width: 400px; /* Limit the width of the form for better aesthetics */
+    padding: 20px;
+    background-color: #4281A1; /* Primary Blue */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
-input, button {
-    margin: 10px 0;
+.login-form {
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.login-form .form-group {
+    width: 100%;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #FFFFFF; /* White */
+}
+
+.login-form input {
+    width: 100%;
     padding: 10px;
-}
-
-button {
-    background-color: #007bff;
-    color: white;
     border: none;
-    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #FFFFFF; /* White */
+    color: #2B1828; /* Dark Gray */
+    margin-bottom: 10px;
 }
 
-button:hover {
-    background-color: #0056b3;
+.button {
+    background-image: url('../images/nav_button_background.png'); /* Use the provided button background */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 200px; /* Adjust width to match index page */
+    height: 60px; /* Adjust height to match index page */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #303241; /* Dark Gray */
+    text-decoration: none;
+    font-size: 16px;
+    border: none; /* Remove border */
+    outline: none; /* Remove outline */
+    cursor: pointer;
+    margin: 0 auto; /* Center the button within the container */
+    padding: 0; /* Remove padding */
+    margin-top: 15px; /* Ensure some space between input fields and button */
+}
+
+.button:hover {
+    opacity: 0.8;
+}
+
+p {
+    margin-top: 20px;
+    color: #FFFFFF; /* White */
+}
+
+p a {
+    color: #01F5FF; /* Accent Cyan */
+    text-decoration: none;
+}
+
+p a:hover {
+    text-decoration: underline;
+}
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.logo {
+    width: 350px;
+    height: 350px;
+    object-fit: contain;
+    margin-bottom: 20px;
 }
