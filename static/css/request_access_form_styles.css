@@ -1,6 +1,6 @@
-/* Index Style */
+/* Request Access Form Style */
 body {
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     background-color: #271524; 
     color: #FFFFFF; 
     margin: 0;
@@ -40,7 +40,7 @@ main {
     align-items: center;
 }
 
-.login-form {
+.request-form {
     width: 100%;
     max-width: 300px;
     display: flex;
@@ -48,7 +48,7 @@ main {
     align-items: center;
 }
 
-.login-form .form-group {
+.request-form .form-group {
     width: 100%;
     margin-bottom: 15px;
     display: flex;
@@ -56,13 +56,14 @@ main {
     align-items: center;
 }
 
-.login-form label {
+.request-form label {
     display: block;
     margin-bottom: 5px;
     color: #FFFFFF; 
 }
 
-.login-form input {
+.request-form input,
+.request-form textarea {
     width: 100%;
     padding: 10px;
     border: none;
@@ -71,6 +72,11 @@ main {
     background-color: #FFFFFF; 
     color: #2B1828; 
     margin-bottom: 10px;
+}
+
+.request-form textarea {
+    resize: vertical;
+    height: 80px; /* Twice the height of the input fields */
 }
 
 .button {

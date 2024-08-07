@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/user_dashboard_styles.css') }}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <input type="hidden" id="userID" value="{{ user_id }}">
+    <input type="hidden" id="username" value="{{ username }}">
+    <div class="d-flex" id="sidebar-wrapper">
+        <div class="border-right" id="sidebar-wrapper">
+            <div class="sidebar-heading">The User Dashboard</div>
+            <div class="list-group list-group-flush">
+                <a href="/dashboard" class="list-group-item list-group-item-action" data-target="/dashboard" onclick="loadPage('/dashboard', event)">Home</a>
+                <a href="#" class="list-group-item list-group-item-action" data-target="/tests" onclick="loadPage('/tests', event)">Tests</a>
+                <a href="#" class="list-group-item list-group-item-action" data-target="/userstats" onclick="loadPage('/userstats', event)">User Stats</a>
+                <a href="#" class="list-group-item list-group-item-action" data-target="/accountmanagement" onclick="loadPage('/accountmanagement', event)">Account Management</a>
+                <a href="#" class="list-group-item list-group-item-action" onclick="confirmLogout(event)">Log Out</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

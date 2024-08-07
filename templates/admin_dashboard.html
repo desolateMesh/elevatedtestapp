@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to the Admin Dashboard</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/admin_dashboard_styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    
+<div id="sidebar-wrapper" class="d-flex">
+    <div id="sidebar-wrapper" class="border-right">
+        <div class="sidebar-heading">
+            Admin Dashboard
+        </div>
+
+        <div class="list-group list-group-flush">
+            <a href="/admin_dashboard" class="list-group-item list-group-item-action" data-target="/admin_dashboard" onclick="loadPage('/admin_dashboard')">Home</a>
+            <a href="/test_management" class="list-group-item list-group-item-action" data-target="/test_management" onclick="loadPage('/test_management')">Tests Management</a>
+            <a href="/question_management" class="list-group-item list-group-item-action" data-target="/question_management" onclick="loadPage('/question_management')">Questions Management</a>
+            <a href="/user_management" class="list-group-item list-group-item-action" data-target="/user_management" onclick="loadPage('/user_management')">Users Management</a>
+            <a href="/reports" class="list-group-item list-group-item-action" data-target="/reports" onclick="loadPage('/reports')">Reports</a>
+            <a href="/settings" class="list-group-item list-group-item-action" data-target="/settings" onclick="loadPage('/settings')">Settings</a>
+            <a href="#" class="list-group-item list-group-item-action" onclick="confirmLogout(event)">Log Out</a>
+        </div>
+    </div>
+</div>
+
+<div id="page-content-wrapper">
+    <div class="container-fluid">
+        <div id="content-area">
+            <h1>Welcome to the Admin Dashboard</h1>
+            <p>
+                Welcome to the Admin Dashboard, your centralized hub for managing all aspects of your testing ecosystem with ease and efficiency. Here, you'll find a comprehensive suite of tools tailored to streamline the management of tests, questions, user accounts, and system configurations.
+                <!-- ... rest of the welcome message ... -->
+            </p>
+        </div>
+    </div>
+</div>
