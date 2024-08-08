@@ -45,15 +45,21 @@ def get_db_connection():
 def check_credentials(username, password):
     logging.info(f"Attempting login for username: {username}")
     try:
+        logging.info("Attempting to establish database connection")
         conn = get_db_connection()
+        logging.info("Database connection established successfully")
         cursor = conn.cursor()
+        logging.info(f"Executing query for username: {username}")
         cursor.execute("SELECT UserID, PasswordHash, Role FROM Users WHERE Username = ?", (username,))
         user = cursor.fetchone()
         conn.close()
+        logging.info(f"Query executed, user data: {user}")
         
         if user and check_password_hash(user.PasswordHash, password):
+            logging.info("Password verified successfully")
             return {'id': user.UserID, 'role': user.Role}
         else:
+            logging.info("Invalid credentials")
             return None
     except Exception as e:
         logging.error(f"Error in check_credentials: {str(e)}")
@@ -86,16 +92,20 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        user = check_credentials(username, password)
-        if user:
-            session['user_id'] = user['id']
-            session['username'] = username
-            if user['role'] == 'admin':
-                return redirect(url_for('admin_dashboard'))
+        try:
+            user = check_credentials(username, password)
+            if user:
+                session['user_id'] = user['id']
+                session['username'] = username
+                if user['role'] == 'admin':
+                    return redirect(url_for('admin_dashboard'))
+                else:
+                    return redirect(url_for('user_dashboard'))
             else:
-                return redirect(url_for('user_dashboard'))
-        else:
-            flash('Invalid credentials', 'error')
+                flash('Invalid credentials', 'error')
+        except Exception as e:
+            flash(f'An error occurred: {str(e)}', 'error')
+            logging.error(f"Login error: {str(e)}")
     return render_template('login.html')
 
 #@app.route('/request_access_form', methods=['GET'])
