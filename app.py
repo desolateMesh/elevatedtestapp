@@ -116,8 +116,7 @@ def request_access():
             'response': recaptcha_response
         })
         result = response.json()
-
-        if not result.get('success') or result.get('score') < 0.5:  # Adjust score threshold as needed
+        if not result.get('success'):
             flash('reCAPTCHA verification failed. Please try again.', 'error')
             return redirect(url_for('request_access'))
 
