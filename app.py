@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, make_response
 import pyodbc
 import os
 import requests
@@ -12,6 +12,13 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
+def add_headers(response):
+    response.headers['Cache-Control'] = 'public, max-age=300'  # Cache for 5 minutes
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
+
+app.after_request(add_headers)
+
 # Set Flask app configuration from environment variables
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
@@ -22,14 +29,8 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
 def get_db_connection():
-    server = os.getenv('DB_SERVER')
-    database = os.getenv('DB_NAME')
-    username = os.getenv('DB_USERNAME')
-    password = os.getenv('DB_PASSWORD')
-    driver = '{ODBC Driver 18 for SQL Server}'
-    
-    connection_string = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-    return pyodbc.connect(connection_string)
+    conn_str = os.environ['SQLCONNSTR_DefaultConnection']
+    return pyodbc.connect(conn_str)
 
 def check_credentials(username, password):
     try:
@@ -39,13 +40,18 @@ def check_credentials(username, password):
         user = cursor.fetchone()
         conn.close()
 
+        print(f"Database query result: {user}")  # Log the entire user record
+
         if user:
-            is_password_correct = (user.PasswordHash == password)
+            print(f"Stored password hash: {user.PasswordHash}")  # Log the stored password hash
+            print(f"Provided password: {password}")  # Log the provided password
+            is_password_correct = (user.PasswordHash == password)  # Direct comparison for now
+            print(f"Password check result: {is_password_correct}")  # Log the result of the password check
             if is_password_correct:
                 return {'id': user.UserID, 'role': user.Role}
         return None
     except Exception as e:
-        print(f"Error in check_credentials: {str(e)}")
+        print(f"Error in check_credentials: {str(e)}")  # Log any exceptions
         return None
     
 class Config:
@@ -75,15 +81,18 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        print(f"Login attempt: username={username}, password={'*' * len(password)}")  # Log login attempt
         user = check_credentials(username, password)
         if user:
-            session['user_id'] = user['id']
+            print(f"User authenticated: {user}")  # Log successful authentication
+            session['user_id'] = user['id']  
             session['username'] = username
-            if user['role'] == 'admin':
+            if user['role'] == 'admin':  
                 return redirect(url_for('admin_dashboard'))
             else:
                 return redirect(url_for('user_dashboard'))
         else:
+            print("Authentication failed")  # Log failed authentication
             return render_template('login.html', error='Invalid credentials')
     return render_template('login.html')
 
@@ -145,7 +154,6 @@ def admin_dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('admin_dashboard.html', user_id=session['user_id'], username=session['username'])
-
 @app.route('/logout')
 def logout():
     session.clear()
