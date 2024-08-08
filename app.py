@@ -1,5 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, make_response 
+from flask_mail import Mail, Message
 import pyodbc
+import logging
 import os
 import requests
 from dotenv import load_dotenv
@@ -28,6 +30,8 @@ app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
+mail = Mail(app)
+
 def get_db_connection():
     server = os.getenv('DB_SERVER')
     database = os.getenv('DB_NAME')
@@ -39,25 +43,20 @@ def get_db_connection():
     return pyodbc.connect(connection_string)
 
 def check_credentials(username, password):
+    logging.info(f"Attempting login for username: {username}")
     try:
+        logging.info("Attempting to establish database connection")
         conn = get_db_connection()
+        logging.info("Database connection established successfully")
         cursor = conn.cursor()
+        logging.info(f"Executing query for username: {username}")
         cursor.execute("SELECT UserID, PasswordHash, Role FROM Users WHERE Username = ?", (username,))
         user = cursor.fetchone()
         conn.close()
-
-        print(f"Database query result: {user}")  # Log the entire user record
-
-        if user:
-            print(f"Stored password hash: {user.PasswordHash}")  # Log the stored password hash
-            print(f"Provided password: {password}")  # Log the provided password
-            is_password_correct = (user.PasswordHash == password)  # Direct comparison for now
-            print(f"Password check result: {is_password_correct}")  # Log the result of the password check
-            if is_password_correct:
-                return {'id': user.UserID, 'role': user.Role}
-        return None
+        logging.info(f"Query executed, user data: {user}")
+        # ... rest of the function ...
     except Exception as e:
-        print(f"Error in check_credentials: {str(e)}")  # Log any exceptions
+        logging.error(f"Error in check_credentials: {str(e)}")
         return None
     
 class Config:
@@ -102,51 +101,68 @@ def login():
             return render_template('login.html', error='Invalid credentials')
     return render_template('login.html')
 
-@app.route('/request_access_form', methods=['GET'])
-def request_access_form():
-    return render_template('request_access_form.html')
+#@app.route('/request_access_form', methods=['GET'])
+#def request_access_form():
+    #return render_template('request_access_form.html')
 
-@app.route('/submit_request_access', methods=['POST'])
-def submit_request_access():
+@app.route('/request_access_form', methods=['GET', 'POST'])
+def request_access():
     if request.method == 'POST':
-        firstname = request.form['firstname']
-        lastname = request.form['lastname']
+        recaptcha_response = request.form['g-recaptcha-response']
+        secret_key = os.getenv('RECAPTCHA_SECRET_KEY')
+        verification_url = "https://www.google.com/recaptcha/api/siteverify"
+        response = requests.post(verification_url, data={
+            'secret': secret_key,
+            'response': recaptcha_response
+        })
+        result = response.json()
+
+        if not result.get('success') or result.get('score') < 0.5:  # Adjust score threshold as needed
+            flash('reCAPTCHA verification failed. Please try again.', 'error')
+            return redirect(url_for('request_access'))
+
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
         email = request.form['email']
-        notes = request.form['notes']
-        subject = "Access Request"
-        body = f"First Name: {firstname}\nLast Name: {lastname}\nEmail: {email}\nNotes: {notes}"
-        payload = {
-            "message": {
-                "subject": subject,
-                "body": {
-                    "contentType": "Text",
-                    "content": body
-                },
-                "toRecipients": [
-                    {
-                        "emailAddress": {
-                            "address": app.config['MAIL_DEFAULT_SENDER']
-                        }
-                    }
-                ]
-            },
-            "saveToSentItems": "false"
-        }
+        comments = request.form['comments']
+
+        subject = "New Access Request"
+        body = f"First Name: {first_name}\nLast Name: {last_name}\nEmail: {email}\nComments: {comments}"
+        
         try:
-            token = get_access_token()
+            access_token = get_access_token()
+            if access_token is None:
+                raise Exception("Failed to get access token")
+            
             headers = {
-                'Authorization': f'Bearer {token}',
+                'Authorization': f'Bearer {access_token}',
                 'Content-Type': 'application/json'
             }
-            send_mail_url = f'https://graph.microsoft.com/v1.0/users/{app.config["MAIL_USERNAME"]}/sendMail'
-            response = requests.post(send_mail_url, json=payload, headers=headers)
+            email_payload = {
+                "message": {
+                    "subject": subject,
+                    "body": {
+                        "contentType": "Text",
+                        "content": body
+                    },
+                    "toRecipients": [
+                        {
+                            "emailAddress": {
+                                "address": os.getenv('MAIL_DEFAULT_SENDER')
+                            }
+                        }
+                    ]
+                }
+            }
+            send_mail_url = f'https://graph.microsoft.com/v1.0/users/{os.getenv("MAIL_USERNAME")}/sendMail'
+            response = requests.post(send_mail_url, json=email_payload, headers=headers)
             response.raise_for_status()
-            flash('Your request has been sent successfully!', 'success')
+            flash('Your access request has been submitted for review', 'success')
         except Exception as e:
-            flash(f'Failed to send your request. Error: {e}', 'error')
-
-        return redirect(url_for('request_access_form'))
-
+            print(f"Error sending email: {str(e)}")
+            flash('There was an error submitting your request. Please try again later.', 'error')
+        
+        return redirect(url_for('request_access'))
     return render_template('request_access_form.html')
 
 @app.route('/user_dashboard')
