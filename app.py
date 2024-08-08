@@ -29,8 +29,14 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
 def get_db_connection():
-    conn_str = os.environ['SQLCONNSTR_DefaultConnection']
-    return pyodbc.connect(conn_str)
+    server = os.getenv('DB_SERVER')
+    database = os.getenv('DB_NAME')
+    username = os.getenv('DB_USERNAME')
+    password = os.getenv('DB_PASSWORD')
+    driver = '{ODBC Driver 18 for SQL Server}'
+    
+    connection_string = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+    return pyodbc.connect(connection_string)
 
 def check_credentials(username, password):
     try:
