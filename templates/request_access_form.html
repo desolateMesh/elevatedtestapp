@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Request Access to Test App - Elevated Cloudworks</title>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/request_access_form_styles.css') }}">
 </head>
 <body>
@@ -27,7 +26,8 @@
                 <label for="comments">Comments</label>
                 <textarea id="comments" name="comments" placeholder="Your comments..." required autocomplete="off"></textarea>
             </div>
-            <div class="g-recaptcha" data-sitekey="6LdKeiIqAAAAAM_CG5REssKViiNdDnkAtuYaKX56"></div>
+            <!-- Add the reCAPTCHA div here -->
+            <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
             <button type="submit" class="button">Submit</button>
         </form>
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -40,5 +40,7 @@
             {% endif %}
         {% endwith %}
     </div>
+    <!-- Add the reCAPTCHA script here -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </body>
 </html>

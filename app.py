@@ -116,10 +116,11 @@ def request_access():
             'response': recaptcha_response
         })
         result = response.json()
+
         if not result.get('success'):
             flash('reCAPTCHA verification failed. Please try again.', 'error')
             return redirect(url_for('request_access'))
-
+        
         first_name = request.form['first_name']
         last_name = request.form['last_name']
         email = request.form['email']
@@ -158,11 +159,13 @@ def request_access():
             response.raise_for_status()
             flash('Your access request has been submitted for review', 'success')
         except Exception as e:
-            print(f"Error sending email: {str(e)}")
+            logging.error(f"Error sending email: {str(e)}")
             flash('There was an error submitting your request. Please try again later.', 'error')
         
         return redirect(url_for('request_access'))
-    return render_template('request_access_form.html')
+
+    recaptcha_site_key = os.getenv('RECAPTCHA_SITE_KEY')
+    return render_template('request_access_form.html', recaptcha_site_key=recaptcha_site_key)
 
 @app.route('/user_dashboard')
 def user_dashboard():
