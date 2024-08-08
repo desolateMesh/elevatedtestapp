@@ -45,16 +45,16 @@ def get_db_connection():
 def check_credentials(username, password):
     logging.info(f"Attempting login for username: {username}")
     try:
-        logging.info("Attempting to establish database connection")
         conn = get_db_connection()
-        logging.info("Database connection established successfully")
         cursor = conn.cursor()
-        logging.info(f"Executing query for username: {username}")
         cursor.execute("SELECT UserID, PasswordHash, Role FROM Users WHERE Username = ?", (username,))
         user = cursor.fetchone()
         conn.close()
-        logging.info(f"Query executed, user data: {user}")
-        # ... rest of the function ...
+        
+        if user and check_password_hash(user.PasswordHash, password):
+            return {'id': user.UserID, 'role': user.Role}
+        else:
+            return None
     except Exception as e:
         logging.error(f"Error in check_credentials: {str(e)}")
         return None
@@ -86,19 +86,16 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        print(f"Login attempt: username={username}, password={'*' * len(password)}")  # Log login attempt
         user = check_credentials(username, password)
         if user:
-            print(f"User authenticated: {user}")  # Log successful authentication
-            session['user_id'] = user['id']  
+            session['user_id'] = user['id']
             session['username'] = username
-            if user['role'] == 'admin':  
+            if user['role'] == 'admin':
                 return redirect(url_for('admin_dashboard'))
             else:
                 return redirect(url_for('user_dashboard'))
         else:
-            print("Authentication failed")  # Log failed authentication
-            return render_template('login.html', error='Invalid credentials')
+            flash('Invalid credentials', 'error')
     return render_template('login.html')
 
 #@app.route('/request_access_form', methods=['GET'])
@@ -108,28 +105,28 @@ def login():
 @app.route('/request_access_form', methods=['GET', 'POST'])
 def request_access():
     if request.method == 'POST':
-        recaptcha_response = request.form['g-recaptcha-response']
-        secret_key = os.getenv('RECAPTCHA_SECRET_KEY')
-        verification_url = "https://www.google.com/recaptcha/api/siteverify"
-        response = requests.post(verification_url, data={
-            'secret': secret_key,
-            'response': recaptcha_response
-        })
-        result = response.json()
-
-        if not result.get('success'):
-            flash('reCAPTCHA verification failed. Please try again.', 'error')
-            return redirect(url_for('request_access'))
-        
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        email = request.form['email']
-        comments = request.form['comments']
-
-        subject = "New Access Request"
-        body = f"First Name: {first_name}\nLast Name: {last_name}\nEmail: {email}\nComments: {comments}"
-        
         try:
+            recaptcha_response = request.form['g-recaptcha-response']
+            secret_key = os.getenv('RECAPTCHA_SECRET_KEY')
+            verification_url = "https://www.google.com/recaptcha/api/siteverify"
+            response = requests.post(verification_url, data={
+                'secret': secret_key,
+                'response': recaptcha_response
+            })
+            result = response.json()
+
+            if not result.get('success'):
+                flash('reCAPTCHA verification failed. Please try again.', 'error')
+                return redirect(url_for('request_access'))
+            
+            first_name = request.form['first_name']
+            last_name = request.form['last_name']
+            email = request.form['email']
+            comments = request.form['comments']
+
+            subject = "New Access Request"
+            body = f"First Name: {first_name}\nLast Name: {last_name}\nEmail: {email}\nComments: {comments}"
+            
             access_token = get_access_token()
             if access_token is None:
                 raise Exception("Failed to get access token")
@@ -158,12 +155,13 @@ def request_access():
             response = requests.post(send_mail_url, json=email_payload, headers=headers)
             response.raise_for_status()
             flash('Your access request has been submitted for review', 'success')
-        except Exception as e:
-            logging.error(f"Error sending email: {str(e)}")
-            flash('There was an error submitting your request. Please try again later.', 'error')
-        
-        return redirect(url_for('request_access'))
+            return redirect(url_for('login'))  # Redirect to login page after successful submission
 
+        except Exception as e:
+            logging.error(f"Error in request_access: {str(e)}")
+            flash('There was an error submitting your request. Please try again later.', 'error')
+    
+    # For GET requests or if there's an error in POST
     recaptcha_site_key = os.getenv('RECAPTCHA_SITE_KEY')
     return render_template('request_access_form.html', recaptcha_site_key=recaptcha_site_key)
 
