@@ -40,7 +40,14 @@ def get_db_connection():
     driver = '{ODBC Driver 18 for SQL Server}'
     
     connection_string = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-    return pyodbc.connect(connection_string)
+    logging.info(f"Attempting to connect with string: DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD=****")
+    try:
+        conn = pyodbc.connect(connection_string)
+        logging.info("Database connection successful")
+        return conn
+    except pyodbc.Error as e:
+        logging.error(f"Database connection failed: {str(e)}")
+        raise
 
 def check_credentials(username, password):
     logging.info(f"Attempting login for username: {username}")
@@ -53,7 +60,7 @@ def check_credentials(username, password):
         cursor.execute("SELECT UserID, PasswordHash, Role FROM Users WHERE Username = ?", (username,))
         user = cursor.fetchone()
         conn.close()
-        logging.info(f"Query executed, user data: {user}")
+        logging.info(f"Query executed, user data found: {user is not None}")
         
         if user and check_password_hash(user.PasswordHash, password):
             logging.info("Password verified successfully")
@@ -92,20 +99,26 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        logging.info(f"Login attempt for username: {username}")
         try:
             user = check_credentials(username, password)
+            logging.info(f"check_credentials returned: {user}")
             if user:
                 session['user_id'] = user['id']
                 session['username'] = username
+                logging.info(f"User authenticated. Role: {user['role']}")
                 if user['role'] == 'admin':
+                    logging.info("Redirecting to admin dashboard")
                     return redirect(url_for('admin_dashboard'))
                 else:
+                    logging.info("Redirecting to user dashboard")
                     return redirect(url_for('user_dashboard'))
             else:
+                logging.info("Invalid credentials")
                 flash('Invalid credentials', 'error')
         except Exception as e:
+            logging.error(f"Login error: {str(e)}", exc_info=True)
             flash(f'An error occurred: {str(e)}', 'error')
-            logging.error(f"Login error: {str(e)}")
     return render_template('login.html')
 
 #@app.route('/request_access_form', methods=['GET'])
@@ -186,16 +199,6 @@ def admin_dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('admin_dashboard.html', user_id=session['user_id'], username=session['username'])
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
-
-@app.route('/dashboard')
-def dashboard():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    return render_template('dashboard.html', user_id=session['user_id'], username=session['username'])
 
 @app.route('/tests')
 def tests():
@@ -203,17 +206,35 @@ def tests():
         return redirect(url_for('login'))
     return render_template('tests.html', user_id=session['user_id'], username=session['username'])
 
-@app.route('/userstats')
+@app.route('/user_stats')
 def userstats():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('userstats.html', user_id=session['user_id'], username=session['username'])
+    return render_template('user_stats.html', user_id=session['user_id'], username=session['username'])
 
 @app.route('/accountmanagement')
 def accountmanagement():
+    print("Account management route called")  # For debugging
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('accountmanagement.html', user_id=session['user_id'], username=session['username'])
+    return render_template('account_management.html', username=session['username'])
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/check_db')
+def check_db():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Users")
+        users = cursor.fetchall()
+        conn.close()
+        return f"Database connection successful. Found {len(users)} users.", 200
+    except Exception as e:
+        return f"Database error: {str(e)}", 500
 
 if __name__ == '__main__':
     app.run(debug=True)

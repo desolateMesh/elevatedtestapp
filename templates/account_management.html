@@ -1,0 +1,32 @@
+<div class="content-area">
+
+    <div class="update-password">
+        <h2>Update Password</h2>
+        <form id="update-password-form">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" value="{{ username }}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="new_password">New Password:</label>
+                <input type="password" id="new_password" name="new_password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm New Password:</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+
+            <button type="submit">Update Password</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('update-password-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // Add password update logic here
+    alert('Password update functionality not implemented yet.');
+});
+</script>
