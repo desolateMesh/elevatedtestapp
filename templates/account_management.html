@@ -1,26 +1,84 @@
 <div class="content-area">
-
-    <div class="update-password">
+    
+    <div class="form-container update-password-container">
         <h2>Update Password</h2>
-        <form id="update-password-form">
+        <form class="update-password">
             <div class="form-group">
                 <label for="username">Username:</label>
-                <input type="text" id="username" name="username" value="{{ username }}" readonly>
+                <input type="text" id="username" name="username" value="jasonr" readonly>
             </div>
-
             <div class="form-group">
-                <label for="new_password">New Password:</label>
-                <input type="password" id="new_password" name="new_password" required>
+                <label for="current-password">Current Password:</label>
+                <input type="password" id="current-password" name="current-password">
             </div>
-
             <div class="form-group">
-                <label for="confirm_password">Confirm New Password:</label>
-                <input type="password" id="confirm_password" name="confirm_password" required>
+                <label for="new-password">New Password:</label>
+                <input type="password" id="new-password" name="new-password">
             </div>
-
+            <div class="form-group">
+                <label for="confirm-password">Confirm New Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password">
+            </div>
             <button type="submit">Update Password</button>
         </form>
     </div>
+
+    <div class="form-container profile-information-container">
+        <h2>Profile Information</h2>
+        <form class="profile-information">
+            <div class="form-group">
+                <label for="profile-username">Username:</label>
+                <input type="text" id="profile-username" name="profile-username" value="jasonr" readonly>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone">
+            </div>
+            <div class="form-group">
+                <label for="profile-picture">Profile Picture:</label>
+                <input type="file" id="profile-picture" name="profile-picture">
+            </div>
+            <button type="submit">Update Profile</button>
+        </form>
+    </div>
+
+    <div class="notification-settings">
+        <h2>Notification Settings</h2>
+        <form id="notification-settings-form">
+            <div class="form-group">
+                <label for="email_notifications">Email Notifications:</label>
+                <input type="checkbox" id="email_notifications" name="email_notifications" {{ email_notifications }}>
+            </div>
+
+            <div class="form-group">
+                <label for="sms_notifications">SMS Notifications:</label>
+                <input type="checkbox" id="sms_notifications" name="sms_notifications" {{ sms_notifications }}>
+            </div>
+
+            <div class="form-group">
+                <label for="inapp_notifications">In-App Notifications:</label>
+                <input type="checkbox" id="inapp_notifications" name="inapp_notifications" {{ inapp_notifications }}>
+            </div>
+
+            <button type="submit">Update Notifications</button>
+        </form>
+    </div>
+
+    <div class="delete-account">
+        <h2>Delete Account</h2>
+        <form id="delete-account-form">
+            <div class="form-group">
+                <label for="confirm-delete">Confirm Account Deletion:</label>
+                <input type="checkbox" id="confirm-delete" name="confirm-delete">
+            </div>
+            <button type="submit">Delete Account</button>
+        </form>    
+    </div>
+    
 </div>
 
 <script>
@@ -29,4 +87,11 @@ document.getElementById('update-password-form').addEventListener('submit', funct
     // Add password update logic here
     alert('Password update functionality not implemented yet.');
 });
+
+document.getElementById('profile-information-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // Add profile information update logic here
+    alert('Profile information update functionality not implemented yet.');
+});
+
 </script>

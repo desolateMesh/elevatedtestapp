@@ -5,24 +5,29 @@ body {
     color: #FFFFFF;
     margin: 0;
     padding: 0;
-    display: flex;
     height: 100vh;
+    overflow: hidden;
 }
 
-.container {
+#wrapper {
     display: flex;
-    width: 100%;
+    height: 100vh;
 }
 
 /* Sidebar Styles */
 #sidebar-wrapper {
     width: 250px;
     background-color: #271524;
-    padding: 20px 0 0 0; /* Removed bottom padding */
+    padding: 20px 0 0 0;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 100vh;
+    overflow-y: auto;
+    position: fixed;
+    left: 0;
+    top: 0;
 }
 
 .sidebar-heading {
@@ -30,129 +35,35 @@ body {
     font-weight: bold;
     color: #01C1C7;
     text-align: center;
-    margin-bottom: 10px; /* Reduced margin */
-}
-
-.list-group {
-    width: 100%;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.list-group-item {
-    background-image: url('../images/nav_button_background.png');
-    background-size: 100% 100%; /* Changed to cover entire area */
-    background-color: transparent !important;
-    transition: opacity 0.3s ease;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 75%; /* Changed to full width */
-    height: 75px; /* Reduced height */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #271524;
-    text-decoration: none;
-    font-size: 16px;
-    margin-bottom: 0; /* Removed bottom margin */
-    border: none;
-    padding: 0;
-    cursor: pointer;
-}
-
-.list-group-item.active,
-.list-group-item:active,
-.list-group-item:hover {
-    background-color: transparent !important;
-    color: #FFFFFF;
-    opacity: 0.8;
-}
-
-.list-group-item:hover {
-    opacity: 0.8;
-    background-color: transparent;
-    color: #FFFFFF;
+    margin-bottom: 20px;
 }
 
 /* Content Area Styles */
-.page-content-wrapper {
+#page-content-wrapper {
     flex: 1;
+    margin-left: 250px; /* Same as sidebar width */
     padding: 20px;
     box-sizing: border-box;
-    color: #FFFFFF;
+    height: 100vh;
+    overflow-y: auto;
     background-color: #404049;
 }
 
-.content-area {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.container-fluid {
+    max-width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#main-content {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #404049;
-    color: #FFFFFF;
 }
 
-.create-test, .test-area {
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-.create-test-header, .test-area-header {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-form {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-form label, form select, form input, form button {
-    width: 100%;
-    max-width: 500px;
-    margin-bottom: 10px;
-}
-
-button {
-    padding: 10px;
-    margin: 5px 0;
-    border: none;
-    border-radius: 5px;
-    background-color: #4281A1;
-    color: #FFFFFF;
-    cursor: pointer;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-}
-
-button:hover {
-    opacity: 0.8;
-}
-
-/* New styles for Account Management */
-.content-area h1, .content-area h2 {
-    color: #01C1C7;
-    margin-bottom: 20px;
-}
-
-.update-password {
-    background-color: #271524;
-    padding: 20px;
-    border-radius: 5px;
-    max-width: 400px;
-    margin: 0 auto;
-}
-
+/* Form Styles */
 .form-group {
     margin-bottom: 15px;
 }
@@ -160,10 +71,10 @@ button:hover {
 .form-group label {
     display: block;
     margin-bottom: 5px;
-    color: #FFFFFF;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
     width: 100%;
     padding: 8px;
     border: 1px solid #4281A1;
@@ -182,27 +93,116 @@ button[type="submit"] {
     font-weight: bold;
 }
 
-button[type="submit"]:hover {
+
+.list-group-item {
+    background-image: url('../images/nav_button_background.png');
+    background-size: 100% 100%;
+    background-color: transparent !important;
+    transition: opacity 0.3s ease;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 110%;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #271524;
+    text-decoration: none;
+    font-size: 16px;
+    margin-bottom: 15px;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.list-group-item.active,
+.list-group-item:active,
+.list-group-item:hover {
+    background-color: transparent !important;
+    color: #FFFFFF;
+    opacity: 0.8;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #4281A1;
+    border-radius: 4px;
+    background-color: #FFFFFF;
+    color: #FFFFFF;
+    box-sizing: border-box;
+}
+
+.form-group input[type="file"] {
+    background-color: #FFFFFF;
+    border: 1px solid #4281A1;
+    padding: 5px;
+}
+
+/* Style for checkboxes */
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+}
+
+/* Style for submit buttons */
+button[type="submit"],
+.btn-primary {
+    background-color: #01C1C7;
+    color: #271524;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 10px;
+}
+
+button[type="submit"]:hover,
+.btn-primary:hover {
     background-color: #4281A1;
+}
+
+/* Additional styles to match the screenshot */
+#sidebar-wrapper {
+    background-color: #271524;
+}
+
+#page-content-wrapper {
+    background-color: #404049;
+}
+
+.sidebar-heading {
+    color: #01C1C7;
+}
+
+h2, h3 {
+    color: #FFFFFF;
+}
+
+/* Ensure text in the sidebar buttons is visible */
+.list-group-item {
+    color: #FFFFFF;
 }
 
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-    .container {
+    #wrapper {
         flex-direction: column;
     }
 
-    .sidebar-wrapper {
+    #sidebar-wrapper {
         width: 100%;
+        height: auto;
+        position: static;
         padding: 10px;
     }
 
-    .page-content-wrapper {
-        padding: 10px;
-    }
-
-    .content-area {
+    #page-content-wrapper {
+        margin-left: 0;
         padding: 10px;
     }
 }
