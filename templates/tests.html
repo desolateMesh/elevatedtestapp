@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <link rel="stylesheet" href="user_dashboard_styles.css">
+</head>
+<body>
+    <div class="test-config-container">
+        <h2>Configure Your Test</h2>
+        <form id="test-config-form">
+            <div class="form-group">
+                <label for="num-questions">Number of Questions:</label>
+                <input type="number" id="num-questions" name="num-questions" min="1" max="100" value="10">
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category">
+                    <option value="">Select a category</option>
+                    <!-- We'll populate this dynamically later -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="subcategory">Subcategory:</label>
+                <select id="subcategory" name="subcategory">
+                    <option value="">Select a subcategory</option>
+                    <!-- We'll populate this dynamically based on the selected category -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="difficulty">Difficulty:</label>
+                <select id="difficulty" name="difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="timed">Timed Test:</label>
+                <input type="checkbox" id="timed" name="timed">
+            </div>
+            
+            <div class="form-group" id="time-limit-group" style="display: none;">
+                <label for="time-limit">Time Limit (minutes):</label>
+                <input type="number" id="time-limit" name="time-limit" min="1" max="180" value="60">
+            </div>
+            
+            <div class="form-group">
+                <label for="question-type">Question Type:</label>
+                <select id="question-type" name="question-type">
+                    <option value="multiple-choice">Multiple Choice</option>
+                    <option value="fill-in-blank">Fill in the Blank</option>
+                    <option value="combination">Combination</option>
+                </select>
+            </div>
+            
+            <button type="submit" id="start-test">Start Test</button>
+        </form>
+        <br>
+        </div>
+        <br>
+        <br>
+        <div class="test-question-container">
+            <div class="question-area">
+              <div class="question-header">
+                <h2>Question <span id="question-number">1</span></h2>
+                <div class="timer">Time: <span id="timer-display">00:00</span></div>
+              </div>
+              <p class="question-text">Question text will appear here.</p>
+            </div>
+          
+            <div class="answer-area">
+              <div class="form-group">
+                <input type="radio" id="optionA" name="answer" value="A">
+                <label for="optionA">Option A</label>
+              </div>
+              <div class="form-group">
+                <input type="radio" id="optionB" name="answer" value="B">
+                <label for="optionB">Option B</label>
+              </div>
+              <div class="form-group">
+                <input type="radio" id="optionC" name="answer" value="C">
+                <label for="optionC">Option C</label>
+              </div>
+              <div class="form-group">
+                <input type="radio" id="optionD" name="answer" value="D">
+                <label for="optionD">Option D</label>
+              </div>
+            </div>
+          
+            <div class="navigation-area">
+              <button id="prev-button">Previous</button>
+              <button id="next-button">Next</button>
+              <button id="submit-button">Submit Test</button>
+            </div>
+          </div>
+</body>
+</html>

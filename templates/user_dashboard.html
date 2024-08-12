@@ -14,7 +14,7 @@
         <div class="border-right" id="sidebar-wrapper">
             <div class="sidebar-heading">The User Dashboard</div>
             <div class="list-group list-group-flush">
-                <a href="/dashboard" class="list-group-item list-group-item-action" onclick="loadPage('/dashboard', event)">Home</a>
+                <a href="#" class="list-group-item list-group-item-action" onclick="loadHomePage(event)">Home</a>
                 <a href="/tests" class="list-group-item list-group-item-action" onclick="loadPage('/tests', event)">Tests</a>
                 <a href="/userstats" class="list-group-item list-group-item-action" onclick="loadPage('/userstats', event)">User Stats</a>
                 <a href="/accountmanagement" class="list-group-item list-group-item-action" onclick="loadPage('/accountmanagement', event)">Account Management</a>
@@ -44,7 +44,13 @@
                 }
             });
         }
-        
+
+        function loadHomePage(event) {
+            event.preventDefault();
+            $('#main-title').text('Welcome to Your Dashboard');
+            $('#main-content').html(''); // Clear the content area
+        }
+             
         function confirmLogout(event) {
             event.preventDefault();
             if (confirm("Are you sure you want to log out?")) {
