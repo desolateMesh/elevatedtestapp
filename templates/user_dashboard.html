@@ -24,6 +24,9 @@
         <div id="page-content-wrapper">
             <div class="container-fluid">
                 <h1 id="main-title">Welcome to Your Dashboard</h1>
+                <p>
+                    This is your user dashboard. From here, you can access your tests, view your stats, manage your account, and log out.
+                </p>
                 <div id="main-content" class="content-area">
                     <!-- Dynamic content will be loaded here -->
                 </div>
@@ -48,7 +51,7 @@
         function loadHomePage(event) {
             event.preventDefault();
             $('#main-title').text('Welcome to Your Dashboard');
-            $('#main-content').html(''); // Clear the content area
+            $('#main-content').html(''); 
         }
              
         function confirmLogout(event) {

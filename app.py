@@ -200,13 +200,14 @@ def admin_dashboard():
         return redirect(url_for('login'))
     return render_template('admin_dashboard.html', user_id=session['user_id'], username=session['username'])
 
+# Routes for user_dashboard
 @app.route('/tests')
 def tests():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('tests.html', user_id=session['user_id'], username=session['username'])
 
-@app.route('/user_stats')
+@app.route('/userstats')
 def userstats():
     if 'user_id' not in session:
         return redirect(url_for('login'))
@@ -223,6 +224,20 @@ def accountmanagement():
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+# Routes for admin_dashboard
+@app.route('/questionmanagement')
+def questionmanagement():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('question_management.html', user_id=session['user_id'], username=session['username'])
+
+@app.route('/usermanagement')
+def usermanagement():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('user_management.html', user_id=session['user_id'], username=session['username'])
+
 
 @app.route('/check_db')
 def check_db():

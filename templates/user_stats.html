@@ -1,23 +1,112 @@
-<div class="content-area">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <link rel="stylesheet" href="user_dashboard_styles.css">
+</head>
+<body>
+    <div class="test-config-container">
+        <div class="user-stats">
+            <h2>User Stats</h2>
+            <form id="user-stats-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <!-- add dynamic code to display the username of the currently signed-in user -->
+                    <span id="username"></span>
+                </div>
 
-    <div class="user-stats">
-        <h2>User Stats</h2>
-        <form id="user-stats-form">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <!--add dynamic code to display the user name of the currenly signed in user-->
-            </div>
+                <div class="form-group">
+                    <label for="tests-taken">Total Number of Tests Taken:</label>
+                    <!-- add dynamic code to display the total number of tests taken -->
+                    <span id="tests-taken"></span>
+                </div>
 
-            <div class="form-group">
-                <label for="tests-taken">Test taken:</label>
+                <div class="form-group">
+                    <label for="average-score">Average Score:</label>
+                    <!-- add dynamic code to display the average score -->
+                    <span id="average-score"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="highest-score">Highest Score:</label>
+                    <!-- add dynamic code to display the highest score -->
+                    <span id="highest-score"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="lowest-score">Lowest Score:</label>
+                    <!-- add dynamic code to display the lowest score -->
+                    <span id="lowest-score"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="favorite-category">Favorite Category of Test Taken:</label>
+                    <!-- add dynamic code to display the favorite category of test taken -->
+                    <span id="favorite-category"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="recent-test-date">Most Recent Test Date:</label>
+                    <!-- add dynamic code to display the most recent test date -->
+                    <span id="recent-test-date"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="average-time">Test Completion Time (Average):</label>
+                    <!-- add dynamic code to display the average test completion time -->
+                    <span id="average-time"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="total-time">Total Time Spent on Tests:</label>
+                    <!-- add dynamic code to display the total time spent on tests -->
+                    <span id="total-time"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="performance-trend">Performance Trend:</label>
+                    <!-- add dynamic code to display the performance trend -->
+                    <span id="performance-trend"></span>
+                </div>
+
+                <button type="submit">Clear all tests</button>
+            </form>
+        </div>
+        <div class="display-all-user-test-container">
+            <h2>All User Tests</h2>
+            <table id="user-tests-table">
+                <thead>
+                    <tr>
+                        <th>Test ID</th>
+                        <th>Test Date</th>
+                        <th>Category</th>
+                        <th>Score</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamic rows will be inserted here -->
+                </tbody>
+            </table>
+
+            <div id="test-details">
+                <h3>Test Details</h3>
+                <table id="test-questions-table">
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Answer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic rows will be inserted here -->
+                    </tbody>
+                </table>
             </div>
-            <div class="form-group">
-                <label for="confirm_password">Favorite Category of test taken:</label>
-                <!--add dynamic code to display the user name of the currenly signed in user-->
-            </div>
-            <button type="submit">Clear all test</button>
+        </div>
+
         </form>
-    </div>
-</div>
-
-<script>
+    </body>
+</html>

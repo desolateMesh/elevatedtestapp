@@ -45,27 +45,31 @@ body {
 
 .list-group-item {
     background-image: url('../images/nav_button_background.png');
-    background-size: 100% 100%; 
-    background-color: #271524;
+    background-size: 100% 100%;
+    background-color: transparent !important;
+    transition: opacity 0.3s ease;
     background-repeat: no-repeat;
     background-position: center;
-    width: 75%; 
-    height: 75px; 
+    width: 90%;
+    height: 75px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #f4f5fc;
+    color: #FFFFFF;
     text-decoration: none;
     font-size: 16px;
-    margin-bottom: 0; 
+    margin-bottom: 15px;
     border: none;
     padding: 0;
     cursor: pointer;
 }
 
+.list-group-item.active,
+.list-group-item:active,
 .list-group-item:hover {
+    background-color: transparent !important;
+    color: #FFFFFF;
     opacity: 0.8;
-    background-color: #271524;
 }
 
 /* Content Area Styles */
@@ -123,6 +127,85 @@ button {
 
 button:hover {
     background-color: #B0F4FB;
+}
+
+/* Question management Stlyes */
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 20px;
+}
+form {
+    padding: 20px;
+    border: 1px solid #ccc;
+}
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+input[type="text"] {
+    width: calc(100% - 12px); 
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+button[type="submit"] {
+    background-color: #0056b3;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+#allQuestions {
+    padding: 20px;
+    border: 1px solid #ccc;
+}
+
+
+/* User Management Styles */
+.container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 20px;
+}
+section {
+    padding: 20px;
+    border: 1px solid #ccc;
+}
+form {
+    margin-top: 20px;
+}
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+input,
+select {
+    width: calc(100% - 24px); 
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+button[type="submit"],
+.filter-btn {
+    background-color: #0056b3;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.filter-btn {
+    margin-top: 10px;
+    margin-left: 10px; 
 }
 
 /* Responsive Styles */

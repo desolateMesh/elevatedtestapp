@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard_styles.css') }}">
+    
+</head>
+<body>
+    <div class="container">    
+        <section id="add-users">
+            <h2>Adding Users</h2>
+            <form id="addUserForm" method="POST" action="/add_user">
+                <label for="userID">User ID:</label>
+                <input type="text" id="userID" name="userID" required>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>            
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>                               
+                <label for="role">Role:</label>
+                <select id="role" name="role">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <label for="status">Status:</label>
+                <select id="status" name="status">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+                <button type="submit">Add User</button>
+        </form>
+        </section>
+        
+        <section id="delete-users">
+            <h2>Deleting Users</h2>
+            <form id="deleteUserForm">
+                <label for="searchUser">Search by Username or Email:</label>
+                <input type="text" id="searchUser" name="searchUser" placeholder="Enter username or email">
+                <button type="button" onclick="performSearchUser()">Search</button>
+                <button type="button" onclick="deleteUser()">Delete</button>
+            
+                <input type="hidden" id="userIdToDelete" value="">
+                <div id="searchResults">
+                </div>
+            </form>
+        </section>
+
+        <section id="view-user-names">
+            <h2>Viewing User Usernames</h2>
+            <label for="statusFilter">Filter by Status:</label>
+            <select id="statusFilter">
+                <option value="all">All</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+            <button class="filter-btn" onclick="generateUsernames()">Generate Username List</button>
+            <div id="usernameList"></div>
+        </section>
+    </div>
+</body>
+</html>

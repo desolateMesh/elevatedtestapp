@@ -1,40 +1,73 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to the Admin Dashboard</title>
+    <title>Admin Dashboard</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/admin_dashboard_styles.css') }}" rel="stylesheet">
 </head>
 <body>
-    
-<div id="sidebar-wrapper" class="d-flex">
-    <div id="sidebar-wrapper" class="border-right">
-        <div class="sidebar-heading">
-            Admin Dashboard
+    <input type="hidden" id="userID" value="{{ user_id }}">
+    <input type="hidden" id="username" value="{{ username }}">
+    <div class="d-flex" id="wrapper">
+        <div class="border-right" id="sidebar-wrapper">
+            <div class="sidebar-heading">Admin Dashboard</div>
+            <div class="list-group list-group-flush">
+                <a href="#" class="list-group-item list-group-item-action" onclick="loadHomePage(event)">Home</a>
+                <a href="/test_management" class="list-group-item list-group-item-action" onclick="loadPage('/test_management', event)">Tests Management</a>
+                <a href="/questionmanagement" class="list-group-item list-group-item-action" onclick="loadPage('/questionmanagement', event)">Questions Management</a>
+                <a href="/usermanagement" class="list-group-item list-group-item-action" onclick="loadPage('/usermanagement', event)">Users Management</a>
+                <a href="/reports" class="list-group-item list-group-item-action" onclick="loadPage('/reports', event)">Reports</a>
+                <a href="/settings" class="list-group-item list-group-item-action" onclick="loadPage('/settings', event)">Settings</a>
+                <a href="/logout" class="list-group-item list-group-item-action" onclick="confirmLogout(event)">Log Out</a>
+            </div>
         </div>
-
-        <div class="list-group list-group-flush">
-            <a href="/admin_dashboard" class="list-group-item list-group-item-action" data-target="/admin_dashboard" onclick="loadPage('/admin_dashboard')">Home</a>
-            <a href="/test_management" class="list-group-item list-group-item-action" data-target="/test_management" onclick="loadPage('/test_management')">Tests Management</a>
-            <a href="/question_management" class="list-group-item list-group-item-action" data-target="/question_management" onclick="loadPage('/question_management')">Questions Management</a>
-            <a href="/user_management" class="list-group-item list-group-item-action" data-target="/user_management" onclick="loadPage('/user_management')">Users Management</a>
-            <a href="/reports" class="list-group-item list-group-item-action" data-target="/reports" onclick="loadPage('/reports')">Reports</a>
-            <a href="/settings" class="list-group-item list-group-item-action" data-target="/settings" onclick="loadPage('/settings')">Settings</a>
-            <a href="#" class="list-group-item list-group-item-action" onclick="confirmLogout(event)">Log Out</a>
-        </div>
-    </div>
-</div>
-
-<div id="page-content-wrapper">
-    <div class="container-fluid">
-        <div id="content-area">
-            <h1>Welcome to the Admin Dashboard</h1>
-            <p>
-                Welcome to the Admin Dashboard, your centralized hub for managing all aspects of your testing ecosystem with ease and efficiency. Here, you'll find a comprehensive suite of tools tailored to streamline the management of tests, questions, user accounts, and system configurations.
-                <!-- ... rest of the welcome message ... -->
-            </p>
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <h1 id="main-title">Welcome to the Admin Dashboard</h1>
+                <div id="main-content" class="content-area">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Ensure jQuery is loaded first -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function loadPage(url, event) {
+            event.preventDefault();
+            $('#main-title').text($(event.target).text());
+            $('#main-content').load(url, function(response, status, xhr) {
+                if (status == "error") {
+                    $('#main-content').html("<p>Error loading content: " + xhr.status + " " + xhr.statusText + "</p>");
+                }
+            });
+        }
+
+        function loadHomePage(event) {
+            event.preventDefault();
+            $('#main-title').text('Welcome to the Admin Dashboard');
+            $('#main-content').html(''); 
+        }
+             
+        function confirmLogout(event) {
+            event.preventDefault();
+            if (confirm("Are you sure you want to log out?")) {
+                fetch('/logout', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                }).then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    }
+                }).catch(error => {
+                    console.error('Error during logout:', error);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
