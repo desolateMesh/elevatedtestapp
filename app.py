@@ -1,9 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, make_response 
 from flask_mail import Mail, Message
-import pyodbc
-import logging
-import os
-import requests
+from flask import jsonify
+import pyodbc, logging, os, requests, json
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
 from msal import ConfidentialClientApplication
@@ -146,7 +144,6 @@ def request_access():
             last_name = request.form['last_name']
             email = request.form['email']
             comments = request.form['comments']
-
             subject = "New Access Request"
             body = f"First Name: {first_name}\nLast Name: {last_name}\nEmail: {email}\nComments: {comments}"
             
@@ -201,12 +198,59 @@ def admin_dashboard():
     return render_template('admin_dashboard.html', user_id=session['user_id'], username=session['username'])
 
 # Routes for user_dashboard
-@app.route('/tests')
+@app.route('/tests', methods=['GET', 'POST'])
 def tests():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('tests.html', user_id=session['user_id'], username=session['username'])
+    
+    if request.method == 'POST':
+        try:
+            test_type = request.form.get('test_type')
+            category = request.form.get('category')
+            sub_category = request.form.get('sub_category')
+            num_questions = int(request.form.get('num_questions'))
+            confidence_level = float(request.form.get('confidence_level'))
+            user_id = session['user_id']
+            
+            if not category:
+                return "Category is required", 400
+            
+            # You'll need to implement these functions
+            # attempt_number = get_or_increment_category_attempt(user_id, category)
+            # questions = get_test_questions(category, num_questions, sub_category)
+            
+            # For now, let's just return a success message
+            return jsonify({"message": "Test created successfully"}), 200
+        
+        except Exception as e:
+            logging.error(f"Error in test creation: {str(e)}", exc_info=True)
+            return str(e), 500
+    
+    else:  # GET request
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT DISTINCT Category FROM MultipleChoiceQuestions WHERE Category IS NOT NULL")
+            categories = [row.Category for row in cursor.fetchall()]
+            
+            cursor.execute("SELECT DISTINCT SubCategory FROM MultipleChoiceQuestions WHERE SubCategory IS NOT NULL")
+            sub_categories = [row.SubCategory for row in cursor.fetchall()]
+            
+            conn.close()
 
+            return render_template('tests.html', 
+                                   user_id=session['user_id'], 
+                                   username=session['username'], 
+                                   categories=categories, 
+                                   sub_categories=sub_categories)
+        except Exception as e:
+            logging.error(f"Error in tests route: {str(e)}", exc_info=True)
+            return render_template('tests.html', 
+                                   user_id=session['user_id'], 
+                                   username=session['username'], 
+                                   categories=[], 
+                                   sub_categories=[])
+        
 @app.route('/userstats')
 def userstats():
     if 'user_id' not in session:
@@ -225,7 +269,7 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# Routes for admin_dashboard
+# Routes for admin_dashboard pages
 @app.route('/questionmanagement')
 def questionmanagement():
     if 'user_id' not in session:
@@ -238,6 +282,49 @@ def usermanagement():
         return redirect(url_for('login'))
     return render_template('user_management.html', user_id=session['user_id'], username=session['username'])
 
+# Routes for API endpoints
+@app.route('/add_question', methods=['POST'])
+def add_question():
+    if 'user_id' not in session:
+        logging.warning('User not logged in, redirecting to login page')
+        return redirect(url_for('login'))
+
+    try:
+        question_text = request.form['questionText']
+        category = request.form['category']
+        sub_category = request.form['subCategory']
+        answer1 = request.form['answer1']
+        answer2 = request.form['answer2']
+        answer3 = request.form['answer3']
+        answer4 = request.form['answer4']
+        correct_answer = int(request.form['correctAnswer'])
+
+        logging.info(f'Received form data: {request.form}')
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        logging.info('Database connection established')
+
+        cursor.execute("""
+            INSERT INTO MultipleChoiceQuestions (QuestionText, Category, SubCategory, Answer1, Answer2, Answer3, Answer4, CorrectAnswer)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (question_text, category, sub_category, answer1, answer2, answer3, answer4, correct_answer))
+
+        logging.info('SQL query executed')
+
+        conn.commit()
+        logging.info('Changes committed to database')
+        conn.close()
+        logging.info('Database connection closed')
+
+        flash('Question added successfully!', 'success')
+        return redirect(url_for('admin_dashboard.html/questionmanagement'))
+
+    except Exception as e:
+        logging.error(f'Error adding question: {str(e)}', exc_info=True)
+        flash(f'Error adding question: {str(e)}', 'error')
+        return redirect(url_for('admin_dashboard.html/questionmanagement'))
 
 @app.route('/check_db')
 def check_db():
