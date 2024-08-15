@@ -1,7 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, make_response 
-from flask_mail import Mail, Message
-from flask import jsonify
-import pyodbc, logging, os, requests, json
+from flask import Flask, render_template, request, redirect, url_for, session, flash, make_response, jsonify
+from flask_mail import Mail
+import pyodbc, logging, os, requests
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
 from msal import ConfidentialClientApplication
@@ -13,17 +12,22 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
 def add_headers(response):
-    response.headers['Cache-Control'] = 'public, max-age=300'  # Cache for 5 minutes
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
     response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     return response
 
 app.after_request(add_headers)
 
 # Set Flask app configuration from environment variables
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
-app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
-app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL') == 'True'
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
+app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL', 'False').lower() == 'true'
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
@@ -50,15 +54,11 @@ def get_db_connection():
 def check_credentials(username, password):
     logging.info(f"Attempting login for username: {username}")
     try:
-        logging.info("Attempting to establish database connection")
         conn = get_db_connection()
-        logging.info("Database connection established successfully")
         cursor = conn.cursor()
-        logging.info(f"Executing query for username: {username}")
         cursor.execute("SELECT UserID, PasswordHash, Role FROM Users WHERE Username = ?", (username,))
         user = cursor.fetchone()
         conn.close()
-        logging.info(f"Query executed, user data found: {user is not None}")
         
         if user and check_password_hash(user.PasswordHash, password):
             logging.info("Password verified successfully")
@@ -89,7 +89,7 @@ def get_access_token():
     if 'access_token' in result:
         return result['access_token']
     else:
-        print(f"Failed to acquire token: {result.get('error')}")
+        logging.error(f"Failed to acquire token: {result.get('error')}")
         return None
 
 @app.route('/', methods=['GET', 'POST'])
@@ -100,28 +100,20 @@ def login():
         logging.info(f"Login attempt for username: {username}")
         try:
             user = check_credentials(username, password)
-            logging.info(f"check_credentials returned: {user}")
             if user:
                 session['user_id'] = user['id']
                 session['username'] = username
-                logging.info(f"User authenticated. Role: {user['role']}")
+                session['role'] = user['role']
                 if user['role'] == 'admin':
-                    logging.info("Redirecting to admin dashboard")
                     return redirect(url_for('admin_dashboard'))
                 else:
-                    logging.info("Redirecting to user dashboard")
                     return redirect(url_for('user_dashboard'))
             else:
-                logging.info("Invalid credentials")
                 flash('Invalid credentials', 'error')
         except Exception as e:
             logging.error(f"Login error: {str(e)}", exc_info=True)
-            flash(f'An error occurred: {str(e)}', 'error')
+            flash('An error occurred. Please try again later.', 'error')
     return render_template('login.html')
-
-#@app.route('/request_access_form', methods=['GET'])
-#def request_access_form():
-    #return render_template('request_access_form.html')
 
 @app.route('/request_access_form', methods=['GET', 'POST'])
 def request_access():
@@ -175,29 +167,27 @@ def request_access():
             response = requests.post(send_mail_url, json=email_payload, headers=headers)
             response.raise_for_status()
             flash('Your access request has been submitted for review', 'success')
-            return redirect(url_for('login'))  # Redirect to login page after successful submission
+            return redirect(url_for('login'))
 
         except Exception as e:
             logging.error(f"Error in request_access: {str(e)}")
             flash('There was an error submitting your request. Please try again later.', 'error')
     
-    # For GET requests or if there's an error in POST
     recaptcha_site_key = os.getenv('RECAPTCHA_SITE_KEY')
     return render_template('request_access_form.html', recaptcha_site_key=recaptcha_site_key)
 
 @app.route('/user_dashboard')
 def user_dashboard():
-    if 'user_id' not in session:
+    if 'user_id' not in session or session.get('role') != 'user':
         return redirect(url_for('login'))
     return render_template('user_dashboard.html', user_id=session['user_id'], username=session['username'])
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
-    if 'user_id' not in session:
+    if 'user_id' not in session or session.get('role') != 'admin':
         return redirect(url_for('login'))
     return render_template('admin_dashboard.html', user_id=session['user_id'], username=session['username'])
 
-# Routes for user_dashboard
 @app.route('/tests', methods=['GET', 'POST'])
 def tests():
     if 'user_id' not in session:
@@ -215,11 +205,8 @@ def tests():
             if not category:
                 return "Category is required", 400
             
-            # You'll need to implement these functions
-            # attempt_number = get_or_increment_category_attempt(user_id, category)
-            # questions = get_test_questions(category, num_questions, sub_category)
+            # TODO: Implement test creation logic here
             
-            # For now, let's just return a success message
             return jsonify({"message": "Test created successfully"}), 200
         
         except Exception as e:
@@ -250,7 +237,7 @@ def tests():
                                    username=session['username'], 
                                    categories=[], 
                                    sub_categories=[])
-        
+
 @app.route('/userstats')
 def userstats():
     if 'user_id' not in session:
@@ -259,7 +246,6 @@ def userstats():
 
 @app.route('/accountmanagement')
 def accountmanagement():
-    print("Account management route called")  # For debugging
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('account_management.html', username=session['username'])
@@ -269,26 +255,22 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# Routes for admin_dashboard pages
 @app.route('/questionmanagement')
 def questionmanagement():
-    if 'user_id' not in session:
+    if 'user_id' not in session or session.get('role') != 'admin':
         return redirect(url_for('login'))
     return render_template('question_management.html', user_id=session['user_id'], username=session['username'])
 
 @app.route('/usermanagement')
 def usermanagement():
-    if 'user_id' not in session:
+    if 'user_id' not in session or session.get('role') != 'admin':
         return redirect(url_for('login'))
     return render_template('user_management.html', user_id=session['user_id'], username=session['username'])
 
-# Routes for API endpoints
 @app.route('/add_question', methods=['POST'])
 def add_question():
-    if 'user_id' not in session:
-        logging.warning('User not logged in, redirecting to login page')
+    if 'user_id' not in session or session.get('role') != 'admin':
         return redirect(url_for('login'))
-
     try:
         question_text = request.form['questionText']
         category = request.form['category']
@@ -299,44 +281,37 @@ def add_question():
         answer4 = request.form['answer4']
         correct_answer = int(request.form['correctAnswer'])
 
-        logging.info(f'Received form data: {request.form}')
-
         conn = get_db_connection()
         cursor = conn.cursor()
-
-        logging.info('Database connection established')
 
         cursor.execute("""
             INSERT INTO MultipleChoiceQuestions (QuestionText, Category, SubCategory, Answer1, Answer2, Answer3, Answer4, CorrectAnswer)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (question_text, category, sub_category, answer1, answer2, answer3, answer4, correct_answer))
 
-        logging.info('SQL query executed')
-
         conn.commit()
-        logging.info('Changes committed to database')
         conn.close()
-        logging.info('Database connection closed')
 
         flash('Question added successfully!', 'success')
-        return redirect(url_for('admin_dashboard.html/questionmanagement'))
-
+        return redirect(url_for('questionmanagement'))
     except Exception as e:
         logging.error(f'Error adding question: {str(e)}', exc_info=True)
-        flash(f'Error adding question: {str(e)}', 'error')
-        return redirect(url_for('admin_dashboard.html/questionmanagement'))
+        flash('Error adding question. Please try again.', 'error')
+        return redirect(url_for('questionmanagement'))
 
 @app.route('/check_db')
 def check_db():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return "Unauthorized", 403
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Users")
-        users = cursor.fetchall()
+        cursor.execute("SELECT COUNT(*) FROM Users")
+        user_count = cursor.fetchone()[0]
         conn.close()
-        return f"Database connection successful. Found {len(users)} users.", 200
+        return f"Database connection successful. Found {user_count} users.", 200
     except Exception as e:
         return f"Database error: {str(e)}", 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
