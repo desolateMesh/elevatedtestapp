@@ -27,6 +27,29 @@ header h1 {
     color: #01C1C7; 
 }
 
+nav {
+    width: 100%;
+    background-color: #F9F9F9;
+    padding: 10px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: flex-start;
+}
+
+nav a {
+    color: #070707;
+    text-decoration: none;
+    font-size: 1.2em;
+    margin-right: 20px;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
 main {
     width: 100%;
     max-width: 400px; 
